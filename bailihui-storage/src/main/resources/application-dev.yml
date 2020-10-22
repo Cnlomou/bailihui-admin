@@ -1,0 +1,11 @@
+spring:
+  profiles: dev
+image:
+  path: D:\image
+  url:
+    pre: http://localhost:8989
+logging:
+  file:
+    name: D:/logs/log.txt
+  pattern:
+    console:

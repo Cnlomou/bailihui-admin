@@ -1,0 +1,9 @@
+server:
+  port: 8989
+spring:
+  profiles:
+    active: pro
+  servlet:
+    multipart:
+      file-size-threshold: 10MB
+      max-file-size: 10MB

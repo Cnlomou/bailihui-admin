@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="bailihui-web:war">
+    <output-path>$PROJECT_DIR$/bailihui-web/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>bailihui-web</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="bailihui-web.war">
+      <element id="artifact" artifact-name="bailihui-web:war exploded" />
+    </root>
+  </artifact>
+</component>

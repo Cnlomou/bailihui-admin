@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/bailihui.iml" filepath="$PROJECT_DIR$/.idea/bailihui.iml" />
+      <module fileurl="file://$PROJECT_DIR$/bailihui-storage/bailihui-storage.iml" filepath="$PROJECT_DIR$/bailihui-storage/bailihui-storage.iml" />
+      <module fileurl="file://$PROJECT_DIR$/bailihui-web/bailihui-web.iml" filepath="$PROJECT_DIR$/bailihui-web/bailihui-web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-security/spring-security.iml" filepath="$PROJECT_DIR$/spring-security/spring-security.iml" />
+    </modules>
+  </component>
+</project>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>欢迎页面-X-admin2.2</title>
+        <meta name="renderer"  content="webkit">
+        <meta http-equiv="Access-Control-Allow-Origin" content="*">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <link rel="stylesheet" href="./css/font.css">
+        <link rel="stylesheet" href="./css/xadmin.css">
+        <script src="./lib/layui/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="./js/xadmin.js"></script>
+        <script src="js/jquery.min.js"></script>
+        <!--[if lt IE 9]>
+          <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+          <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script src="network/request.js"></script>
+    </head>
+    
+    <body>
+        <div class="x-nav">
+            <span class="layui-breadcrumb">
+                <a href="">首页</a>
+                <a href="">演示</a>
+                <a>
+                    <cite>导航元素</cite></a>
+            </span>
+            <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+                <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+            </a>
+        </div>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-body ">
+                            <form class="layui-form layui-col-space5">
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input class="layui-input" autocomplete="off" placeholder="开始日" name="start" id="start"></div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input class="layui-input" autocomplete="off" placeholder="截止日" name="end" id="end"></div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="username" placeholder="请输入用户名" autocomplete="off" class="layui-input"></div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <button class="layui-btn" lay-submit="" lay-filter="sreach">
+                                        <i class="layui-icon">&#xe615;</i></button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="layui-card-body ">
+                            <table class="layui-table" id="list" lay-filter="goods">
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+<!--    工具栏-->
+    <script type="text/html" id="toolbar">
+        <div class = "layui-btn-container" > 
+            <button class = "layui-btn layui-btn-sm" lay-event = "getCheckData" > 删除选中行数据 </button>
+            <button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button > 
+            <button class = "layui-btn layui-btn-sm" lay-event = "isAll" > 验证是否全选</button>
+        </div > 
+    </script>
+    <script type="text/html" id="switchTp">
+        <!-- 这里的checked的状态只是演示 -->
+        <input type = "checkbox" name = "status" class="status" id = "{{d.id}}" val="{{d.status}}"  lay-skin = "switch" lay-text = "下架|上架" lay-filter = "statusChange" {{ d.status == '1' ? 'checked': ''}} >
+    </script>
+    <script>layui.use('laydate',
+        function() {
+            var laydate = layui.laydate;
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#start' //指定元素
+            });
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#end' //指定元素
+            });
+
+        });
+    </script>
+    <script>
+        layui.use(['table','layer'],
+        function() {
+            var table = layui.table;
+            let layer=layui.layer;
+            //渲染表格
+            table.render({
+                id: 'list',
+                elem: '#list',
+                url: network.BASE_URL+'/goods/page/goodsdetails',
+                method: 'get',
+                toolbar: '#toolbar',
+                headers: {
+                    jwt: util.getTokenCookie(),
+                },
+                request: {
+                    pageName: 'pageNum',
+                    limitName: 'size'
+                },
+                parseData: formatData,
+                cols:[[
+                    {type:'checkbox'},
+                    {field:'id', width:80, sort: true,title: 'ID'},
+                    {field:'name', minWidth:120, sort: true, edit: 'text',title: '商品名'},
+                    {field:'price', sort: true, edit: 'text', width: 100,title: '价格'},
+                    {field:'oldprice', sort: true, edit: 'text',width: 100,title: '旧价格'},
+                    {field:'status', width:100,event: 'stChange', templet: '#switchTp',title: '上架状态'},
+                    {field:'sellcount', edit: 'text', Width: 60,title: '销售量'},
+                    {field:'rating', edit: 'text', Width: 60,title: '好评数'},
+                    {field:'image',minWidth: 100,templet: function(d){return d.image},title: '图片'},
+                    {field:'category',width:60,title: '类型'},
+                    {field: 'createtime',width:60,titile: '创建时间'}
+                ]],
+                page: true,
+                toolbar: '#toolbar'
+            })
+            function formatData(res){
+                const stat=res.flag===true ? 0: 401;
+                const result={
+                    code: stat,
+                    msg: res.msg,
+                    count: res.data.total,
+                    data: []
+                }
+                if(stat===0){
+                    const dataSet=[];
+                    for(let i=0;i<res.data.list.length;i++){
+                        let goods=res.data.list[i];
+                        dataSet.push({
+                            id: goods.tbGoods.id,
+                            name: goods.tbGoods.name,
+                            price: goods.tbGoods.price,
+                            oldprice: goods.tbGoods.oldprice,
+                            description: goods.tbGoods.description,
+                            sellcount: goods.tbGoods.sellcount,
+                            rating: goods.tbGoods.rating,
+                            status: goods.tbGoods.status,
+                            image: goods.tbGoods.image,
+                            createtime: goods.tbGoods.createtime,
+                            updatetime: goods.tbGoods.updatetime,
+                            category: goods.category.name
+                        })
+                    }
+                    result.data=dataSet;
+                }
+                return result;
+            }
+            //监听单元格编辑
+            table.on('edit(goods)',
+            function(obj) {
+                console.log(obj)
+                var value = obj.value //得到修改后的值
+                ,
+                data = obj.data //得到所在行所有键值
+                ,
+                field = obj.field; //得到字段
+                const loadIndex=layer.load(1,{time: 10*1000})
+                network.updateGoods(data.id,field,value)
+                        .then(res => {
+                            layer.close(loadIndex);
+                            if(res.flag===true){
+                                layer.msg(res.msg+'!',{time: 1000,icon:1})
+                            }else{
+                                layer.msg(res.msg+'!',{time: 1000,icon:5})
+                            }
+                        })
+            });
+            //头工具栏事件
+            table.on('toolbar(goods)',
+            function(obj) {
+                var checkStatus = table.checkStatus(obj.config.id);
+                console.log(checkStatus)
+                switch (obj.event) {
+                case 'getCheckData':
+                    var data = checkStatus.data;
+                    deleteGoods(data)
+                    break;
+                case 'getCheckLength':
+                    var data = checkStatus.data;
+                    layer.msg('选中了：' + data.length + ' 个');
+                    break;
+                case 'isAll':
+                    layer.msg(checkStatus.isAll ? '全选': '未全选');
+                    break;
+                };
+                function deleteGoods(data) {
+                    if(data==null||data.length===0){
+                        layer.msg('未选中数据',{time: 1000})
+                        return
+                    }
+
+                    const ids=[];
+                    for(let i=0;i<data.length;i++){
+                        ids.push(data[i].id);
+                    }
+                    layer.alert('是否删除数据:'+JSON.stringify(ids),()=>{
+                        //删除数据
+                        util.loadAndMsg(layer,(close,sucess,fail)=>{
+                            network.deleteGoods(ids)
+                                    .then(res => {
+                                        close();
+                                        if(res.flag===true){
+                                            sucess('删除成功')
+                                            location.reload()
+                                        }else{
+                                            fail('删除失败')
+                                        }
+                                    })
+                        })
+                    })
+                }
+            });
+            table.on('tool(goods)',function (obj) {
+                if(obj.event==='stChange'){
+                    util.loadAndMsg(layer,(close,su,fa)=>{
+                        network.updateGoods(obj.data.id,'status','0')
+                                .then(res => {
+                                    close();
+                                  if(res.flag===true){
+                                      su('修改成功')
+                                  }else{
+                                      fa('修改失败')
+                                  }
+                                })
+
+                    })
+                }
+            })
+        });
+        $('div[lay-skin]').click(function () {
+            console.log($(this).attr('id'));
+            console.log($(this).attr('val'));
+        })
+    </script>
+    <script>var _hmt = _hmt || []; (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();</script>
+
+</html>
